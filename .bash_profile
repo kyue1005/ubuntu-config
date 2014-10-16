@@ -13,7 +13,11 @@ alias ll='ls -lash'
 
 function tailf
 {
-	tail -f $1
+	if [ ! -z $1 ]; then
+		tail -f $1
+	else
+		echo "Usage: tailf [path to log]"
+	fi
 }
 
 function watchf
