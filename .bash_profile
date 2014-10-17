@@ -14,7 +14,7 @@ alias ll='ls -lash'
 function tailf
 {
 	if [ ! -z $1 ]; then
-		tail -f $1
+		sudo tail -f $1
 	else
 		echo "Usage: tailf [path to log]"
 	fi
@@ -22,5 +22,5 @@ function tailf
 
 function watchf
 {
-	watch -n 1 'free -m && df -h | grep "$1"'
+	watch -n 1 'free -m && echo ''  && df -h | grep "$1"'
 }
