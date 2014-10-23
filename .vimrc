@@ -1,4 +1,6 @@
 set nu
-colorscheme elflord
+syntax enable
+set background=dark
+colorscheme jellybeans
 execute pathogen#infect()
 filetype plugin on
