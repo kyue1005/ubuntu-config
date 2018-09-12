@@ -1,33 +1,10 @@
 export CLICOLOR=1
-
 export LSCOLORS=ExFxCxDxBxegedabagacad
 
 export EDITOR=vim
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 export LC_CTYPE=en_US.UTF-8
-
-source ~/git-completion.sh
-
-alias ll='ls -lash'
-
-function tailf
-{
-	if [ ! -z $1 ]; then
-		sudo tail -f $1
-	else
-		echo "Usage: tailf [path to log]"
-	fi
-}
-
-function watchf
-{
-	watch -n 1 'free -m && echo ''  && df -h | grep "$1"'
-}
-
-parse_git_branch() {
-  git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/(\1)/'
-}
 
 txtblk='\e[0;30m' # Black - Regular
 txtred='\e[0;31m' # Red
@@ -63,4 +40,62 @@ bakcyn='\e[46m'   # Cyan
 bakwht='\e[47m'   # White
 txtrst='\e[0m'    # Text Reset
  
-PS1="$txtcyn\u@\h$txtrst:\w$txtylw\$(parse_git_branch)$txtrst\$ "
+export PATH="$(brew --prefix php@7.1)/bin:$PATH"
+
+alias ll='ls -lash'
+
+#git completion
+source ~/git-completion.sh
+
+#kube-ps1
+source /usr/local/opt/kube-ps1/share/kube-ps1.sh
+
+__parse_git_branch() {
+  git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/ \1/'
+}
+
+function tailf {
+  if [ ! -z $1 ]; then
+    sudo tail -f $1
+  else
+    echo "Usage: tailf [path to log]"
+  fi
+}
+
+function watchf {
+  watch -n 1 'free -m && echo ''  && df -h | grep "$1"'
+}
+
+PS1="\n$txtcyn\u@\h$txtrst:\w$txtylw \n\$(kube_ps1)$txtgrn git:$txtred\$(__parse_git_branch)$txtrst\n> "
+
+# For Gitlab
+export GITLAB_CI_TOKEN="CB9sqasyvpixtAu4Zywi"
+export SCMP_CI_TOKEN=$GITLAB_CI_TOKEN
+export API_DOMAIN=scmpdevuat.scmp.com
+export SCMP_URL_BASE=scmpdevuat.scmp.com
+export API_PORT=81
+export API_PROTOCOL=http
+export API_TOKEN="tyH4YutRToPFg23vW6R4kBQ4LKvZBt38bnNdYZNUK20"
+
+# Login registry if in interactive shell.
+if [ -z "$PS1" ]; then
+  if [ -x "$(which docker)" ]; then
+    if ! grep -q "registry.scmp.tech" ~/.docker/config.json ; then
+      echo -n "Logging into registry.scmp.tech ... "
+      docker login -u "gitlab-ci-token" -p "$SCMP_CI_TOKEN" "registry.scmp.tech"
+    fi
+  fi
+fi
+
+# for bash_complettion
+[ -f /usr/local/etc/bash_completion ] && . /usr/local/etc/bash_completion
+source <(stern --completion=bash)
+
+# For GO
+[[ -s "$HOME/.gvm/scripts/gvm" ]] && source "$HOME/.gvm/scripts/gvm"
+
+export GOPATH=$HOME/go
+export PATH=$PATH:$GOPATH/bin
+
+# For fasd
+eval "$(fasd --init auto)"
