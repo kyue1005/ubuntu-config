@@ -113,3 +113,4 @@ alias kctx="kubectx"
 source <(kubectl completion zsh)
 
 POWERLEVEL9K_LEFT_PROMPT_ELEMENTS+=kubecontext
+source /usr/local/opt/powerlevel10k/powerlevel10k.zsh-theme
