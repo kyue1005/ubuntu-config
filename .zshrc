@@ -146,28 +146,9 @@ autoload -Uz compinit && compinit
 
 export HOMEBREW_NO_AUTO_UPDATE=1
 
-export GITLAB_TOKEN=BzB2DM5E3R1yMjb5khTA
-
 export MONGODB_ATLAS_ENABLE_BETA=true
 
 export CLOUDSDK_PYTHON="python3"
-
-# Sonarcloud provider
-export SONARCLOUD_ORGANIZATION=apoidea
-export SONARCLOUD_TOKEN=204849f97b787d0fbbc4f813976d742486531176
-
-# Atlas provider
-# Superacc
-export MONGODB_ATLAS_PRIVATE_KEY=af447fd2-2ebc-48ec-889a-5815f0f1b419; export MONGODB_ATLAS_PUBLIC_KEY=gifzprqq
-
-# Superacc SCB
-# export MONGODB_ATLAS_PRIVATE_KEY=c8b75287-3d3e-4b8a-8274-a77195eef125; export MONGODB_ATLAS_PUBLIC_KEY=legjcrfz
-
-# EJ
-# export MONGODB_ATLAS_PRIVATE_KEY=2ea212e1-bb86-45a9-997d-7f85f9cdb10b; export MONGODB_ATLAS_PUBLIC_KEY=vfpmfsls
-
-# The next line updates PATH for the Google Cloud SDK.
-if [ -f '/Users/kelvinyue/google-cloud-sdk/path.zsh.inc' ]; then . '/Users/kelvinyue/google-cloud-sdk/path.zsh.inc'; fi
 
 # The next line enables shell command completion for gcloud.
 if [ -f '/Users/kelvinyue/google-cloud-sdk/completion.zsh.inc' ]; then . '/Users/kelvinyue/google-cloud-sdk/completion.zsh.inc'; fi
