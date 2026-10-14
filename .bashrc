@@ -113,10 +113,13 @@ if ! shopt -oq posix; then
   fi
 fi
 
+# User custom configuration (loaded before plugins so it can configure plugins, toggles, and env)
+[ -f ~/.bash_custom ] && . ~/.bash_custom
+
 # ------------------------------------------------------------------------------
 # Oh-My-Zsh Style Plugins
 # ------------------------------------------------------------------------------
-# Define which plugins to load (defaults to all available plugins):
+# Define which plugins to load (defaults to all available plugins if not overridden in ~/.bash_custom):
 if [ -z "${plugins+x}" ]; then
   plugins=(
     aws
@@ -132,7 +135,7 @@ ENABLE_PLUGIN_ALIASES="${ENABLE_PLUGIN_ALIASES:-true}"
 ENABLE_PLUGIN_FUNCS="${ENABLE_PLUGIN_FUNCS:-true}"
 ENABLE_PLUGIN_AUTOCOMPLETE="${ENABLE_PLUGIN_AUTOCOMPLETE:-true}"
 
-# Per-plugin overrides can also be set, e.g.:
+# Per-plugin overrides can also be set in ~/.bash_custom, e.g.:
 # DISABLE_KUBECTL_ALIAS=true
 # DISABLE_AWS_FUNC=true
 
@@ -142,11 +145,10 @@ if [ -f "$BASH_CONFIG_DIR/lib/plugin-loader.bash" ]; then
   load_plugins "$BASH_CONFIG_DIR/plugins"
 fi
 
-# User custom overrides (unversioned / local)
+# User custom overrides (unversioned / local, runs after plugins to allow overriding plugin aliases/funcs)
 [ -f ~/.bash_aliases ] && . ~/.bash_aliases
 [ -f ~/.bash_func ] && . ~/.bash_func
 [ -f ~/.bash_autocomplete ] && . ~/.bash_autocomplete
-[ -f ~/.bash_custom ] && . ~/.bash_custom
 
 # for Cloudflare warp
 export NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/cloudflare-root.crt
