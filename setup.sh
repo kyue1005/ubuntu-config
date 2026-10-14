@@ -3,6 +3,29 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Ensure core APT packages are installed
+CORE_APT_PACKAGES=(
+  bind9-dnsutils
+  build-essential
+  ca-certificates
+  curl
+)
+
+missing_packages=()
+for pkg in "${CORE_APT_PACKAGES[@]}"; do
+  if ! dpkg -s "$pkg" &>/dev/null; then
+    missing_packages+=("$pkg")
+  fi
+done
+
+if [ ${#missing_packages[@]} -gt 0 ]; then
+  echo "Installing missing core APT packages: ${missing_packages[*]}..."
+  sudo apt-get update -y
+  sudo apt-get install -y "${missing_packages[@]}"
+else
+  echo "Core APT packages already installed."
+fi
+
 # Symlink dotfiles to $HOME
 for file in .bashrc .mytheme.omp.json .vimrc; do
   if [ -f "$SCRIPT_DIR/$file" ]; then

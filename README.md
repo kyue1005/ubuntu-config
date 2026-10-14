@@ -4,7 +4,7 @@ Modular configuration stack for Ubuntu (WSL2) with Bash, Oh-My-Posh, Homebrew, M
 
 ## Quickstart
 
-Run the setup script to symlink dotfiles into `$HOME` and register the daily Brewfile backup cron job:
+Run the setup script to install core APT prerequisites (like `build-essential`), symlink dotfiles into `$HOME`, and register the daily Brewfile backup cron job:
 
 ```bash
 ./setup.sh
