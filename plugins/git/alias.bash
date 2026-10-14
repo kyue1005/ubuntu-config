@@ -1,0 +1,15 @@
+# Git aliases
+alias g="git"
+alias ga='git add'
+alias gam='git am'
+alias gst='git status'
+alias gco='git checkout'
+alias gcb='git checkout -b'
+alias gcm='git checkout $(git symbolic-ref refs/remotes/origin/HEAD 2>/dev/null | sed "s@^refs/remotes/origin/@@")'
+alias gcmsg='git commit --message'
+alias gd='git diff'
+alias gl='git pull'
+alias gp='git push'
+alias gpra='git pull --rebase --autostash'
+alias grb='git rebase'
+alias gtl='gtl(){ git tag --sort=-v:refname -n --list "${1}*" ; }; noglob gtl'

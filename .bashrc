@@ -102,15 +102,6 @@ eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv bash)"
 eval "$(mise activate bash)"
 eval "$(oh-my-posh init bash --config $HOME/.mytheme.omp.json)"
 
-# Alias definitions.
-# You may want to put all your additions into a separate file like
-# ~/.bash_aliases, instead of adding them here directly.
-# See /usr/share/doc/bash-doc/examples in the bash-doc package.
-
-if [ -f ~/.bash_aliases ]; then
-    . ~/.bash_aliases
-fi
-
 # enable programmable completion features (you don't need to enable
 # this, if it's already enabled in /etc/bash.bashrc and /etc/profile
 # sources /etc/bash.bashrc).
@@ -122,17 +113,40 @@ if ! shopt -oq posix; then
   fi
 fi
 
-if [ -f ~/.bash_func ]; then
-    . ~/.bash_func
+# ------------------------------------------------------------------------------
+# Oh-My-Zsh Style Plugins
+# ------------------------------------------------------------------------------
+# Define which plugins to load (defaults to all available plugins):
+if [ -z "${plugins+x}" ]; then
+  plugins=(
+    aws
+    git
+    kubectl
+    pulumi
+    terraform
+  )
 fi
 
-if [ -f ~/.bash_autocomplete ]; then
-    . ~/.bash_autocomplete
+# Feature toggles (set to false to disable category globally)
+ENABLE_PLUGIN_ALIASES="${ENABLE_PLUGIN_ALIASES:-true}"
+ENABLE_PLUGIN_FUNCS="${ENABLE_PLUGIN_FUNCS:-true}"
+ENABLE_PLUGIN_AUTOCOMPLETE="${ENABLE_PLUGIN_AUTOCOMPLETE:-true}"
+
+# Per-plugin overrides can also be set, e.g.:
+# DISABLE_KUBECTL_ALIAS=true
+# DISABLE_AWS_FUNC=true
+
+BASH_CONFIG_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
+if [ -f "$BASH_CONFIG_DIR/lib/plugin-loader.bash" ]; then
+  . "$BASH_CONFIG_DIR/lib/plugin-loader.bash"
+  load_plugins "$BASH_CONFIG_DIR/plugins"
 fi
 
-if [ -f ~/.bash_custom ]; then
-    . ~/.bash_custom
-fi
+# User custom overrides (unversioned / local)
+[ -f ~/.bash_aliases ] && . ~/.bash_aliases
+[ -f ~/.bash_func ] && . ~/.bash_func
+[ -f ~/.bash_autocomplete ] && . ~/.bash_autocomplete
+[ -f ~/.bash_custom ] && . ~/.bash_custom
 
 # for Cloudflare warp
 export NODE_EXTRA_CA_CERTS=/usr/local/share/ca-certificates/cloudflare-root.crt

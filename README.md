@@ -22,12 +22,45 @@ Run the setup script to symlink dotfiles into `$HOME` and register the daily Bre
    mise install
    ```
 
-## Structure
+## Oh-My-Zsh Style Plugins for Bash
+
+Plugins are organized under `plugins/<plugin-name>/` and can optionally provide:
+* `alias.bash` (or `aliases.bash`): tool aliases
+* `func.bash` (or `functions.bash`): helper functions
+* `autocomplete.bash` (or `completion.bash`): shell completions
+
+### Configuration (`.bashrc` or `~/.bash_custom`)
+
+```bash
+# Select which plugins to load:
+plugins=(
+  aws
+  git
+  kubectl
+  pulumi
+  terraform
+)
+
+# Global feature toggles (defaults to true)
+ENABLE_PLUGIN_ALIASES=true
+ENABLE_PLUGIN_FUNCS=true
+ENABLE_PLUGIN_AUTOCOMPLETE=true
+
+# Per-plugin overrides (optional):
+# DISABLE_KUBECTL_ALIAS=true
+# DISABLE_AWS_FUNC=true
+```
+
+## Directory Structure
 
 * `.bashrc` - Main interactive shell entry point
-* `.bash_aliases` - Aliases for `kubectl`, `git`, `terraform`, and `pulumi`
-* `.bash_func` - AWS profile/region helpers (`asp`, `asr`, `acp`), Git cleanup (`gtidy`), and socat helper (`ksocat`)
-* `.bash_autocomplete` - Fast cached shell completions for `pulumi`, `kubectl`, and `aws`
+* `lib/plugin-loader.bash` - Plugin discovery and loading engine
+* `plugins/`
+  * `aws/` - Profile/region switching (`asp`, `asr`, `acp`), MFA handling, `aws_completer`
+  * `git/` - Aliases (`g`, `ga`, `gst`, `gco`, ...), `gtidy` function, completion
+  * `kubectl/` - Aliases (`k`, `kgp`, `kl`, ...), `ksocat` helper, cached completion
+  * `pulumi/` - Aliases (`pul`, `pulp`, `pulu`, ...), cached completion
+  * `terraform/` - Aliases (`tf`, `tfa`, `tivp`, ...), completion
 * `.mytheme.omp.json` - Oh-My-Posh prompt configuration
 * `.vimrc` / `.vim` - Vim configuration and plugins
 * `Brewfile` - Homebrew bundle manifest (auto-dumped daily via `update-brewfile.sh`)

@@ -136,13 +136,10 @@ function acp() {
   local profile="$1"
   local mfa_token="$2"
 
-  # Get fallback credentials for if the aws command fails or no command is run
   local aws_access_key_id="$(aws configure get aws_access_key_id --profile "$profile")"
   local aws_secret_access_key="$(aws configure get aws_secret_access_key --profile "$profile")"
   local aws_session_token="$(aws configure get aws_session_token --profile "$profile")"
 
-
-  # First, if the profile has MFA configured, lets get the token and session duration
   local mfa_serial="$(aws configure get mfa_serial --profile "$profile")"
   local sess_duration="$(aws configure get duration_seconds --profile "$profile")"
 
@@ -159,22 +156,18 @@ function acp() {
     mfa_opt=(--serial-number "$mfa_serial" --token-code "$mfa_token" --duration-seconds "${sess_duration:-3600}")
   fi
 
-  # Now see whether we need to just MFA for the current role, or assume a different one
   local role_arn="$(aws configure get role_arn --profile "$profile")"
   local sess_name="$(aws configure get role_session_name --profile "$profile")"
 
   local -a aws_command
   if [[ -n "$role_arn" ]]; then
-    # Means we need to assume a specified role
     aws_command=(aws sts assume-role --role-arn "$role_arn" "${mfa_opt[@]}")
 
-    # Check whether external_id is configured to use while assuming the role
     local external_id="$(aws configure get external_id --profile "$profile")"
     if [[ -n "$external_id" ]]; then
       aws_command+=(--external-id "$external_id")
     fi
 
-    # Get source profile to use to assume role
     local source_profile="$(aws configure get source_profile --profile "$profile")"
     if [[ -z "$sess_name" ]]; then
       sess_name="${source_profile:-profile}"
@@ -183,15 +176,12 @@ function acp() {
 
     echo "Assuming role $role_arn using profile ${source_profile:-profile}"
   else
-    # Means we only need to do MFA
     aws_command=(aws sts get-session-token --profile="$profile" "${mfa_opt[@]}")
     echo "Obtaining session token for profile $profile"
   fi
 
-  # Format output of aws command for easier processing
   aws_command+=(--query '[Credentials.AccessKeyId,Credentials.SecretAccessKey,Credentials.SessionToken]' --output text)
 
-  # Run the aws command to obtain credentials
   local cred_output
   cred_output="$("${aws_command[@]}")"
   if [[ -n "$cred_output" ]]; then
@@ -202,7 +192,6 @@ function acp() {
     aws_session_token="${credentials[2]}"
   fi
 
-  # Switch to AWS profile
   if [[ -n "${aws_access_key_id}" && -n "$aws_secret_access_key" ]]; then
     export AWS_DEFAULT_PROFILE="$profile"
     export AWS_PROFILE="$profile"
@@ -227,7 +216,6 @@ function aws_change_access_key() {
   fi
 
   local profile="$1"
-  # Get current access key
   local original_aws_access_key_id="$(aws configure get aws_access_key_id --profile "$profile")"
 
   asp "$profile" || return 1
@@ -289,24 +277,22 @@ function _aws_regions() {
   local cur="${COMP_WORDS[COMP_CWORD]}"
   COMPREPLY=($(compgen -W "$(aws_regions)" -- "$cur"))
 }
-complete -F _aws_regions asr
 
 function _aws_profiles() {
   local cur="${COMP_WORDS[COMP_CWORD]}"
   COMPREPLY=($(compgen -W "$(aws_profiles)" -- "$cur"))
 }
-complete -F _aws_profiles asp acp aws_change_access_key
 
 # AWS prompt
 function aws_prompt_info() {
   local _aws_to_show
   local region="${AWS_REGION:-${AWS_DEFAULT_REGION:-$AWS_PROFILE_REGION}}"
 
-  local prefix="${AWS_PROFILE_PREFIX:-${ZSH_THEME_AWS_PROFILE_PREFIX:-<aws:}}"
-  local suffix="${AWS_PROFILE_SUFFIX:-${ZSH_THEME_AWS_PROFILE_SUFFIX:->}}"
-  local divider="${AWS_DIVIDER:-${ZSH_THEME_AWS_DIVIDER:- }}"
-  local region_prefix="${AWS_REGION_PREFIX:-${ZSH_THEME_AWS_REGION_PREFIX:-<region:}}"
-  local region_suffix="${AWS_REGION_SUFFIX:-${ZSH_THEME_AWS_REGION_SUFFIX:->}}"
+  local prefix="${AWS_PROFILE_PREFIX:-<aws:}"
+  local suffix="${AWS_PROFILE_SUFFIX:->}"
+  local divider="${AWS_DIVIDER:- }"
+  local region_prefix="${AWS_REGION_PREFIX:-<region:}"
+  local region_suffix="${AWS_REGION_SUFFIX:->}"
 
   if [[ -n "$AWS_PROFILE" ]]; then
     _aws_to_show+="${prefix}${AWS_PROFILE}${suffix}"
@@ -319,10 +305,6 @@ function aws_prompt_info() {
 
   echo "$_aws_to_show"
 }
-
-if [[ "$SHOW_AWS_PROMPT" != false && -n "$ZSH_VERSION" && "$RPROMPT" != *'$(aws_prompt_info)'* ]]; then
-  RPROMPT='$(aws_prompt_info)'"$RPROMPT"
-fi
 
 if [[ "$AWS_PROFILE_STATE_ENABLED" == true ]]; then
   AWS_STATE_FILE="${AWS_STATE_FILE:-/tmp/.aws_current_profile}"
@@ -345,31 +327,3 @@ if [[ "$AWS_PROFILE_STATE_ENABLED" == true ]]; then
     export AWS_DEFAULT_REGION="$AWS_REGION"
   fi
 fi
-
-function gtidy() {
-  # 1. Prune remote tracking branches and deleted tags in a single network call
-  git fetch --prune --prune-tags origin || return 1
-
-  # 2. Find and delete local branches whose upstream tracking branch is gone
-  local gone_branches
-  gone_branches=$(git branch -vv | awk '/: gone]/ {print $1}')
-
-  if [ -n "$gone_branches" ]; then
-    echo "$gone_branches" | xargs git branch -D
-  else
-    echo "No stale branches to clean up."
-  fi
-}
-
-function ksocat() {
-  if [ -z "$1" ]; then
-    echo "Usage: ksocat <id> <target-host> <target-port> <local-port>"
-    return 1
-  fi
-
-  kubectl delete po "socat-$1" --ignore-not-found
-
-  kubectl run "socat-$1" --image=alpine/socat -- "TCP-LISTEN:$4,fork" "TCP:$2:$3" && \
-  kubectl wait --for=condition=Ready "pod/socat-$1" && \
-  kubectl port-forward "socat-$1" "$4:$4"
-}

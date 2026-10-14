@@ -4,7 +4,7 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Symlink dotfiles to $HOME
-for file in .bashrc .bash_aliases .bash_autocomplete .bash_func .mytheme.omp.json .vimrc; do
+for file in .bashrc .mytheme.omp.json .vimrc; do
   if [ -f "$SCRIPT_DIR/$file" ]; then
     ln -sf "$SCRIPT_DIR/$file" "$HOME/$file"
   fi
